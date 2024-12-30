@@ -6,6 +6,10 @@ int main(int argc, char const *argv[]) {
   int quit = 0;
 
   SDL_Event event;
+
+  // SpaceShip position
+  int x = 288;
+  int y = 288;
   // Parameter is a subsystem initialization flag
   // Initialize the SDL library
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -21,7 +25,7 @@ int main(int argc, char const *argv[]) {
   SDL_Renderer *renderer = SDL_CreateRenderer(screen, -1, 0);
 
   // Img we want to render
-  SDL_Surface *image = SDL_LoadBMP("test-img-1.bmp");
+  SDL_Surface *image = SDL_LoadBMP("spaceship.bmp");
   // Image error handling
   if (!image) {
     printf("Failed to load image: %s\n", SDL_GetError());
@@ -41,6 +45,11 @@ int main(int argc, char const *argv[]) {
     SDL_Quit();
     return 1;
   }
+  // Free an RGB surface
+  SDL_FreeSurface(image);
+
+  // Set the color used for drawing operations
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
   // Check to make sure screen was created
   if (!screen) {
@@ -51,10 +60,28 @@ int main(int argc, char const *argv[]) {
   // Loop to keep screen up
   while (!quit) {
     // Wait for event
-    SDL_WaitEvent(&event);
+    SDL_PollEvent(&event);
 
     // Even handling
     switch (event.type) {
+    // handle keydown event
+    case SDL_KEYDOWN:
+      // Handle select keydowns
+      switch (event.key.keysym.sym) {
+      case SDLK_LEFT:
+        x--;
+        break;
+      case SDLK_RIGHT:
+        x++;
+        break;
+      case SDLK_UP:
+        y--;
+        break;
+      case SDLK_DOWN:
+        y++;
+        break;
+      }
+      break;
     case SDL_QUIT:
       quit = 1;
       break;
@@ -66,8 +93,10 @@ int main(int argc, char const *argv[]) {
     // image
 
     // Image display settings
-    SDL_Rect dstrect = {5, 5, 320, 240};
-
+    SDL_Rect dstrect = {x, y, 64, 64};
+    // Clear the current rendering target with the drawing color (Make the whole
+    // background white)
+    SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, texture, NULL, &dstrect);
     SDL_RenderPresent(renderer);
   }
